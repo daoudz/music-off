@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music-Off — AI Music Remover</title>
+    <meta name="description"
+        content="Remove music from audio and video files using AI while preserving voice and sound effects.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <!-- Animated background -->
+    <div class="bg-effects">
+        <div class="bg-orb bg-orb-1"></div>
+        <div class="bg-orb bg-orb-2"></div>
+        <div class="bg-orb bg-orb-3"></div>
+    </div>
+
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <div class="logo-icon">
+                    <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="24" cy="24" r="22" stroke="url(#logo-grad)" stroke-width="2.5" fill="none" />
+                        <path d="M18 14v20l4-2V16l-4-2z" fill="url(#logo-grad)" opacity="0.7" />
+                        <path d="M24 16v16l4-2V18l-4-2z" fill="url(#logo-grad)" opacity="0.85" />
+                        <path d="M30 18v12l4-2V20l-4-2z" fill="url(#logo-grad)" />
+                        <line x1="12" y1="36" x2="36" y2="12" stroke="#ff4d6a" stroke-width="2.5"
+                            stroke-linecap="round" />
+                        <defs>
+                            <linearGradient id="logo-grad" x1="0" y1="0" x2="48" y2="48">
+                                <stop offset="0%" stop-color="#a855f7" />
+                                <stop offset="100%" stop-color="#6366f1" />
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+                <div class="logo-text">
+                    <h1>Music-Off</h1>
+                    <span class="tagline">AI-Powered Music Remover</span>
+                </div>
+            </div>
+            <div class="header-info" id="deviceInfo">
+                <div class="device-badge">
+                    <span class="device-dot"></span>
+                    <span id="deviceText">Checking...</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Output Directory Section -->
+            <section class="output-section glass-card">
+                <div class="section-header-row">
+                    <div class="section-icon">📂</div>
+                    <div>
+                        <h3>Output Directory</h3>
+                        <p class="section-desc">Where your processed files will be saved</p>
+                    </div>
+                </div>
+                <div class="output-input-row">
+                    <input type="text" id="outputDir" placeholder="Enter output directory path..." class="input-field">
+                    <button id="browseOutputBtn" class="btn btn-secondary" title="Browse for folder">📁 Browse</button>
+                    <button id="setOutputBtn" class="btn btn-secondary">Set Path</button>
+                </div>
+                <div id="outputStatus" class="output-status"></div>
+            </section>
+
+            <!-- Upload Zone -->
+            <section class="upload-section glass-card" id="uploadSection">
+                <div class="upload-zone" id="uploadZone">
+                    <div class="upload-icon">
+                        <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="40" cy="40" r="38" stroke="currentColor" stroke-width="1.5"
+                                stroke-dasharray="6 4" opacity="0.3" />
+                            <path d="M40 20v30M28 32l12-12 12 12" stroke="currentColor" stroke-width="2.5"
+                                stroke-linecap="round" stroke-linejoin="round" />
+                            <path d="M22 50h36" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                opacity="0.5" />
+                            <path d="M26 56h28" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                opacity="0.3" />
+                        </svg>
+                    </div>
+                    <h2>Drop your file here</h2>
+                    <p>or click to browse</p>
+                    <div class="upload-formats">
+                        <span class="format-tag">MP3</span>
+                        <span class="format-tag">WAV</span>
+                        <span class="format-tag">MP4</span>
+                        <span class="format-tag">MKV</span>
+                        <span class="format-tag">AVI</span>
+                        <span class="format-tag">MOV</span>
+                        <span class="format-tag">FLAC</span>
+                        <span class="format-tag">OGG</span>
+                    </div>
+                    <p class="upload-limit">Maximum 10 minutes · Up to 500MB</p>
+                    <input type="file" id="fileInput"
+                        accept=".mp3,.wav,.flac,.ogg,.aac,.m4a,.wma,.mp4,.mkv,.avi,.mov,.webm,.flv,.wmv" hidden>
+                </div>
+            </section>
+
+            <!-- Processing Section (hidden by default) -->
+            <section class="processing-section glass-card hidden" id="processingSection">
+                <div class="processing-header">
+                    <div class="file-info">
+                        <div class="file-icon" id="fileTypeIcon">🎵</div>
+                        <div>
+                            <h3 id="fileName">filename.mp3</h3>
+                            <p id="fileDetails" class="file-details">0 MB</p>
+                        </div>
+                    </div>
+                    <button class="btn btn-ghost" id="cancelBtn" title="Cancel">✕</button>
+                </div>
+
+                <!-- Waveform Animation -->
+                <div class="waveform-container" id="waveformContainer">
+                    <div class="waveform">
+                        <div class="wave-bar" style="--delay: 0"></div>
+                        <div class="wave-bar" style="--delay: 1"></div>
+                        <div class="wave-bar" style="--delay: 2"></div>
+                        <div class="wave-bar" style="--delay: 3"></div>
+                        <div class="wave-bar" style="--delay: 4"></div>
+                        <div class="wave-bar" style="--delay: 5"></div>
+                        <div class="wave-bar" style="--delay: 6"></div>
+                        <div class="wave-bar" style="--delay: 7"></div>
+                        <div class="wave-bar" style="--delay: 8"></div>
+                        <div class="wave-bar" style="--delay: 9"></div>
+                        <div class="wave-bar" style="--delay: 10"></div>
+                        <div class="wave-bar" style="--delay: 11"></div>
+                        <div class="wave-bar" style="--delay: 12"></div>
+                        <div class="wave-bar" style="--delay: 13"></div>
+                        <div class="wave-bar" style="--delay: 14"></div>
+                        <div class="wave-bar" style="--delay: 15"></div>
+                        <div class="wave-bar" style="--delay: 16"></div>
+                        <div class="wave-bar" style="--delay: 17"></div>
+                        <div class="wave-bar" style="--delay: 18"></div>
+                        <div class="wave-bar" style="--delay: 19"></div>
+                    </div>
+                </div>
+
+                <!-- Progress -->
+                <div class="progress-section">
+                    <div class="progress-bar-container">
+                        <div class="progress-bar" id="progressBar">
+                            <div class="progress-glow"></div>
+                        </div>
+                    </div>
+                    <div class="progress-info">
+                        <span id="progressText" class="progress-text">Processing...</span>
+                        <span id="progressPercent" class="progress-percent">0%</span>
+                    </div>
+                </div>
+
+                <!-- Status Message -->
+                <div class="status-message" id="statusMessage">
+                    Preparing to process your file...
+                </div>
+            </section>
+
+            <!-- Result Section (hidden by default) -->
+            <section class="result-section glass-card hidden" id="resultSection">
+                <div class="result-icon">
+                    <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="40" cy="40" r="36" fill="url(#success-grad)" opacity="0.15" />
+                        <circle cx="40" cy="40" r="36" stroke="url(#success-grad)" stroke-width="2" />
+                        <path d="M25 40l10 10 20-20" stroke="url(#success-grad)" stroke-width="3" stroke-linecap="round"
+                            stroke-linejoin="round" />
+                        <defs>
+                            <linearGradient id="success-grad" x1="0" y1="0" x2="80" y2="80">
+                                <stop offset="0%" stop-color="#34d399" />
+                                <stop offset="100%" stop-color="#06b6d4" />
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+                <h2 class="result-title">Music Removed Successfully!</h2>
+                <p class="result-filename" id="resultFilename">output_file.wav</p>
+                <p class="result-path" id="resultPath">Saved to: C:\output\</p>
+                <div class="result-actions">
+                    <button class="btn btn-primary" id="downloadBtn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" />
+                        </svg>
+                        Download
+                    </button>
+                    <button class="btn btn-secondary" id="newFileBtn">
+                        Process Another File
+                    </button>
+                </div>
+            </section>
+
+            <!-- Error Section (hidden by default) -->
+            <section class="error-section glass-card hidden" id="errorSection">
+                <div class="error-icon">⚠️</div>
+                <h2 class="error-title">Something went wrong</h2>
+                <p class="error-message" id="errorMessage">An error occurred</p>
+                <button class="btn btn-secondary" id="retryBtn">Try Again</button>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>Powered by <strong>Demucs AI</strong> by Meta · Built with ❤️</p>
+        </footer>
+    </div>
+
+    <script src="main.js"></script>
+</body>
+
+</html>
