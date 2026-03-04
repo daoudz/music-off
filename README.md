@@ -2,6 +2,8 @@
 
 Remove music from audio and video files using AI, while preserving voice and sound effects.
 
+🌐 **[اقرأ بالعربية](README_AR.md)**
+
 ![Python](https://img.shields.io/badge/Python-3.9+-blue)
 ![Demucs](https://img.shields.io/badge/AI-Demucs%20by%20Meta-purple)
 ![FastAPI](https://img.shields.io/badge/Backend-FastAPI-green)
