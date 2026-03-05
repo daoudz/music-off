@@ -10,7 +10,7 @@ from pathlib import Path
 
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
 from app.config import (
@@ -23,7 +23,7 @@ from app.config import (
     SUPPORTED_EXTENSIONS,
     UPLOAD_DIR,
 )
-from app.processor import create_job, get_job, jobs, process_file
+from app.processor import create_job, get_job, jobs, process_file, server_stats
 
 app = FastAPI(title="Music-Off", version="1.0.0")
 
@@ -74,6 +74,9 @@ async def upload_file(file: UploadFile = File(...)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to save file: {str(e)}")
 
+    # Track upload bandwidth
+    server_stats["bytes_uploaded"] += total_size
+
     # Create processing job
     job_id = create_job(file.filename)
 
@@ -107,6 +110,10 @@ async def download_result(job_id: str):
     output_file = job.get("output_file")
     if not output_file or not Path(output_file).exists():
         raise HTTPException(status_code=404, detail="Output file not found")
+
+    # Track download bandwidth
+    output_size = Path(output_file).stat().st_size
+    server_stats["bytes_downloaded"] += output_size
 
     return FileResponse(
         path=output_file,
@@ -314,6 +321,93 @@ async def cleanup_old_files():
 async def startup_event():
     """Start background cleanup task when server starts."""
     asyncio.create_task(cleanup_old_files())
+
+
+@app.get("/api/metrics")
+async def get_metrics():
+    """Full metrics endpoint for the admin dashboard."""
+    import psutil
+
+    now = time.time()
+    uptime = now - server_stats["started_at"]
+
+    # System stats
+    cpu_percent = psutil.cpu_percent(interval=0.1)
+    mem = psutil.virtual_memory()
+
+    # Disk usage for temp dir
+    try:
+        from app.config import TEMP_DIR
+        temp_size = sum(
+            f.stat().st_size for f in Path(str(TEMP_DIR)).rglob("*") if f.is_file()
+        )
+    except Exception:
+        temp_size = 0
+
+    # Output dir size
+    try:
+        output_size = sum(
+            f.stat().st_size for f in OUTPUT_DIR.rglob("*") if f.is_file()
+        )
+    except Exception:
+        output_size = 0
+
+    # Job counts
+    active = sum(1 for j in jobs.values() if j["status"] == "processing")
+    queued = sum(1 for j in jobs.values() if j["status"] == "queued")
+    completed_now = sum(1 for j in jobs.values() if j["status"] == "completed")
+    errored = sum(1 for j in jobs.values() if j["status"] == "error")
+
+    # Active jobs detail
+    active_jobs = []
+    for jid, j in jobs.items():
+        if j["status"] in ("processing", "queued"):
+            active_jobs.append({
+                "id": jid,
+                "filename": j["filename"],
+                "status": j["status"],
+                "progress": j["progress"],
+                "queue_position": j.get("queue_position", 0),
+                "elapsed": round(now - j["created_at"], 1),
+            })
+
+    return {
+        "uptime_seconds": round(uptime, 0),
+        "system": {
+            "cpu_percent": cpu_percent,
+            "ram_total_gb": round(mem.total / (1024**3), 2),
+            "ram_used_gb": round(mem.used / (1024**3), 2),
+            "ram_percent": mem.percent,
+        },
+        "storage": {
+            "temp_dir_bytes": temp_size,
+            "output_dir_bytes": output_size,
+            "total_bytes": temp_size + output_size,
+        },
+        "queue": {
+            "active": active,
+            "queued": queued,
+            "completed": completed_now,
+            "errored": errored,
+        },
+        "totals": {
+            "processed": server_stats["total_processed"],
+            "errors": server_stats["total_errors"],
+            "bytes_uploaded": server_stats["bytes_uploaded"],
+            "bytes_downloaded": server_stats["bytes_downloaded"],
+        },
+        "history": server_stats["history"][-50:],
+        "active_jobs": active_jobs,
+    }
+
+
+@app.get("/dashboard", response_class=HTMLResponse)
+async def dashboard_page():
+    """Serve the admin dashboard page."""
+    dashboard_path = Path(__file__).parent.parent / "frontend" / "dashboard.html"
+    if dashboard_path.exists():
+        return HTMLResponse(content=dashboard_path.read_text(encoding="utf-8"))
+    return HTMLResponse(content="<h1>Dashboard not found</h1>", status_code=404)
 
 
 # Serve frontend static files

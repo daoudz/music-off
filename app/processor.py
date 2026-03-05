@@ -31,6 +31,16 @@ from app.config import (
 # --- Job tracking ---
 jobs: dict = {}
 
+# --- Server stats ---
+server_stats = {
+    "started_at": time.time(),
+    "total_processed": 0,
+    "total_errors": 0,
+    "bytes_uploaded": 0,
+    "bytes_downloaded": 0,
+    "history": [],  # [{timestamp, job_id, filename, status, duration_sec, output_size}]
+}
+
 # --- Processing queue (semaphore) ---
 _processing_semaphore: asyncio.Semaphore | None = None
 
@@ -463,10 +473,35 @@ async def _run_processing(job_id: str, file_path: str, custom_output_dir: Option
         job["output_filename"] = Path(output_file).name
         job["completed_at"] = time.time()
 
+        # Record stats
+        output_size = Path(output_file).stat().st_size if Path(output_file).exists() else 0
+        job["output_size"] = output_size
+        server_stats["total_processed"] += 1
+        server_stats["history"].append({
+            "timestamp": time.time(),
+            "job_id": job_id,
+            "filename": job["filename"],
+            "status": "completed",
+            "duration_sec": round(time.time() - job["created_at"], 1),
+            "output_size": output_size,
+        })
+        # Keep last 100 history entries
+        if len(server_stats["history"]) > 100:
+            server_stats["history"] = server_stats["history"][-100:]
+
     except Exception as e:
         job["status"] = "error"
         job["message"] = f"Processing failed: {str(e)}"
         job["completed_at"] = time.time()
+        server_stats["total_errors"] += 1
+        server_stats["history"].append({
+            "timestamp": time.time(),
+            "job_id": job_id,
+            "filename": job["filename"],
+            "status": "error",
+            "duration_sec": round(time.time() - job["created_at"], 1),
+            "output_size": 0,
+        })
         print(f"Job {job_id} error: {e}")
 
     finally:

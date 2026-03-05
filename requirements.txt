@@ -9,3 +9,5 @@ einops
 julius>=0.2.3
 dora-search
 openunmix
+psutil>=5.9.0
+scipy
