@@ -5,6 +5,7 @@ Serves the API and frontend for the music removal app.
 import asyncio
 import os
 import shutil
+import time
 from pathlib import Path
 
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
@@ -13,12 +14,16 @@ from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
 from app.config import (
+    CLEANUP_INTERVAL_SECONDS,
+    FILE_RETENTION_SECONDS,
     MAX_FILE_SIZE_BYTES,
     MAX_FILE_SIZE_MB,
+    OUTPUT_DIR,
+    PROCESSING_DIR,
     SUPPORTED_EXTENSIONS,
     UPLOAD_DIR,
 )
-from app.processor import create_job, get_job, process_file
+from app.processor import create_job, get_job, jobs, process_file
 
 app = FastAPI(title="Music-Off", version="1.0.0")
 
@@ -246,6 +251,69 @@ async def health():
         "device": device,
         "cuda": cuda_available,
     }
+
+
+@app.get("/api/queue-status")
+async def queue_status():
+    """Get current queue information."""
+    active = sum(1 for j in jobs.values() if j["status"] == "processing")
+    queued = sum(1 for j in jobs.values() if j["status"] == "queued")
+    completed = sum(1 for j in jobs.values() if j["status"] == "completed")
+    return {
+        "active": active,
+        "queued": queued,
+        "completed": completed,
+        "total": len(jobs),
+    }
+
+
+# --- Background cleanup task ---
+async def cleanup_old_files():
+    """Periodically delete expired output/processing files and purge old job records."""
+    while True:
+        await asyncio.sleep(CLEANUP_INTERVAL_SECONDS)
+        now = time.time()
+        expired_job_ids = []
+
+        for job_id, job in list(jobs.items()):
+            completed_at = job.get("completed_at")
+            if completed_at is None:
+                continue  # Still running or queued
+            if now - completed_at < FILE_RETENTION_SECONDS:
+                continue  # Not expired yet
+
+            # Delete output file
+            output_file = job.get("output_file")
+            if output_file and Path(output_file).exists():
+                try:
+                    Path(output_file).unlink()
+                    print(f"[Cleanup] Deleted output: {output_file}")
+                except Exception as e:
+                    print(f"[Cleanup] Failed to delete output {output_file}: {e}")
+
+            # Delete processing temp directory
+            job_proc_dir = PROCESSING_DIR / job_id
+            if job_proc_dir.exists():
+                try:
+                    shutil.rmtree(str(job_proc_dir))
+                    print(f"[Cleanup] Deleted processing dir: {job_proc_dir}")
+                except Exception as e:
+                    print(f"[Cleanup] Failed to delete dir {job_proc_dir}: {e}")
+
+            expired_job_ids.append(job_id)
+
+        # Remove expired jobs from memory
+        for job_id in expired_job_ids:
+            del jobs[job_id]
+
+        if expired_job_ids:
+            print(f"[Cleanup] Purged {len(expired_job_ids)} expired job(s)")
+
+
+@app.on_event("startup")
+async def startup_event():
+    """Start background cleanup task when server starts."""
+    asyncio.create_task(cleanup_old_files())
 
 
 # Serve frontend static files

@@ -400,7 +400,11 @@ function startPolling() {
             const res = await fetch(`${API_BASE}/api/status/${currentJobId}`);
             const job = await res.json();
 
-            if (job.status === 'processing' || job.status === 'queued') {
+            if (job.status === 'queued') {
+                waveformContainer.classList.add('paused');
+                updateProgress(job.progress, job.message);
+            } else if (job.status === 'processing') {
+                waveformContainer.classList.remove('paused');
                 updateProgress(job.progress, job.message);
             } else if (job.status === 'completed') {
                 stopPolling();

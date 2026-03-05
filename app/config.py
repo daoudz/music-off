@@ -38,3 +38,10 @@ STEMS_TO_DISCARD = ["drums", "bass", "other"]
 # --- Server ---
 HOST = "127.0.0.1"
 PORT = 8765
+
+# --- Job Queue ---
+MAX_CONCURRENT_JOBS = 1  # Process one file at a time to avoid overloading
+
+# --- File Retention ---
+FILE_RETENTION_SECONDS = 3600  # 1 hour — output/processing files deleted after this
+CLEANUP_INTERVAL_SECONDS = 300  # Check every 5 minutes

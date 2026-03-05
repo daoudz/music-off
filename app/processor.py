@@ -18,6 +18,7 @@ import torch
 
 from app.config import (
     DEMUCS_MODEL,
+    MAX_CONCURRENT_JOBS,
     MAX_DURATION_SECONDS,
     OUTPUT_DIR,
     PROCESSING_DIR,
@@ -29,6 +30,30 @@ from app.config import (
 
 # --- Job tracking ---
 jobs: dict = {}
+
+# --- Processing queue (semaphore) ---
+_processing_semaphore: asyncio.Semaphore | None = None
+
+
+def _get_semaphore() -> asyncio.Semaphore:
+    """Lazy-init semaphore (must be created inside a running event loop)."""
+    global _processing_semaphore
+    if _processing_semaphore is None:
+        _processing_semaphore = asyncio.Semaphore(MAX_CONCURRENT_JOBS)
+    return _processing_semaphore
+
+
+def _update_queue_positions():
+    """Recalculate queue positions for all waiting jobs."""
+    queued = [
+        (jid, j) for jid, j in jobs.items()
+        if j["status"] == "queued"
+    ]
+    # Sort by creation time
+    queued.sort(key=lambda x: x[1]["created_at"])
+    for pos, (jid, j) in enumerate(queued, start=1):
+        j["queue_position"] = pos
+        j["message"] = f"Queued for processing (position {pos})..."
 
 # --- Custom FFmpeg path ---
 _custom_ffmpeg_dir: str | None = None
@@ -318,12 +343,31 @@ def merge_stems(stem_dir: str, output_path: str, stems_to_keep: list) -> bool:
 
 async def process_file(job_id: str, file_path: str, custom_output_dir: Optional[str] = None):
     """
-    Main processing pipeline. Runs in background.
+    Main processing pipeline. Waits in queue, then processes.
+    """
+    job = jobs[job_id]
+    _update_queue_positions()
+
+    # Wait for our turn in the queue
+    sem = _get_semaphore()
+    await sem.acquire()
+
+    try:
+        await _run_processing(job_id, file_path, custom_output_dir)
+    finally:
+        sem.release()
+        _update_queue_positions()
+
+
+async def _run_processing(job_id: str, file_path: str, custom_output_dir: Optional[str] = None):
+    """
+    Actual processing logic, runs after semaphore is acquired.
     """
     job = jobs[job_id]
     job["status"] = "processing"
     job["progress"] = 5
     job["message"] = "Validating file..."
+    job["queue_position"] = 0
 
     try:
         original_path = Path(file_path)
@@ -417,10 +461,12 @@ async def process_file(job_id: str, file_path: str, custom_output_dir: Optional[
         job["message"] = "✅ Music removed successfully!"
         job["output_file"] = output_file
         job["output_filename"] = Path(output_file).name
+        job["completed_at"] = time.time()
 
     except Exception as e:
         job["status"] = "error"
         job["message"] = f"Processing failed: {str(e)}"
+        job["completed_at"] = time.time()
         print(f"Job {job_id} error: {e}")
 
     finally:
@@ -445,6 +491,8 @@ def create_job(filename: str) -> str:
         "output_filename": None,
         "duration": None,
         "created_at": time.time(),
+        "completed_at": None,
+        "queue_position": 0,
     }
     return job_id
 
