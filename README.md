@@ -2,7 +2,7 @@
 
 Remove music from audio and video files using AI, while preserving voice and sound effects.
 
-🌐 **[اقرأ بالعربية](README_AR.md)**
+🌐 **[اقرأ بالعربية](README_AR.md)** · **[Lire en français](README_FR.md)**
 
 ![Python](https://img.shields.io/badge/Python-3.9+-blue)
 ![Demucs](https://img.shields.io/badge/AI-Demucs%20by%20Meta-purple)
@@ -12,11 +12,14 @@ Remove music from audio and video files using AI, while preserving voice and sou
 
 - 🧠 **AI-Powered** — Uses Meta's Demucs model for state-of-the-art music source separation
 - 🎬 **Video + Audio** — Supports MP4, MKV, AVI, MOV, MP3, WAV, FLAC, and more
-- ⏱️ **Up to 10 minutes** — Process media files up to 10 minutes long
+- ⏱️ **Up to 30 minutes** — Process media files up to 30 minutes long (up to 1GB)
 - 🎯 **Preserves Voice** — Removes only music while keeping dialogue and speech
 - 📂 **Custom Output** — Browse or type a folder path to save results anywhere on your computer
 - ⚡ **GPU Accelerated** — Automatically uses your GPU (NVIDIA CUDA) if available for faster processing
-- 🖥️ **Beautiful UI** — Premium dark theme with drag-and-drop upload
+- 🌗 **Dark & Light Themes** — Switch between a premium dark theme and a sky-blue light theme
+- 🌍 **Multilingual** — Available in English, Arabic (with RTL), and French
+- 🔧 **FFmpeg Configuration** — Auto-detects FFmpeg, or manually browse to set its location
+- 🖥️ **Beautiful UI** — Premium design with drag-and-drop upload and glassmorphism effects
 
 ---
 
@@ -111,7 +114,7 @@ git clone https://github.com/daoudz/music-off.git
 | **Audio** | MP3, WAV, FLAC, OGG, AAC, M4A, WMA |
 | **Video** | MP4, MKV, AVI, MOV, WebM, FLV, WMV |
 
-**Limits:** Maximum file size is **500 MB** and maximum duration is **10 minutes**.
+**Limits:** Maximum file size is **1 GB** and maximum duration is **30 minutes**.
 
 ---
 
