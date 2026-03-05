@@ -3,7 +3,9 @@
    ============================================ */
 
 /* --- Reset & Base --- */
-*, *::before, *::after {
+*,
+*::before,
+*::after {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
@@ -109,10 +111,23 @@ body {
 }
 
 @keyframes float {
-    0%, 100% { transform: translate(0, 0) scale(1); }
-    25% { transform: translate(30px, -40px) scale(1.05); }
-    50% { transform: translate(-20px, 20px) scale(0.95); }
-    75% { transform: translate(10px, 30px) scale(1.02); }
+
+    0%,
+    100% {
+        transform: translate(0, 0) scale(1);
+    }
+
+    25% {
+        transform: translate(30px, -40px) scale(1.05);
+    }
+
+    50% {
+        transform: translate(-20px, 20px) scale(0.95);
+    }
+
+    75% {
+        transform: translate(10px, 30px) scale(1.02);
+    }
 }
 
 /* --- App Container --- */
@@ -206,8 +221,15 @@ body {
 }
 
 @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.4; }
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.4;
+    }
 }
 
 /* --- Output Section --- */
@@ -493,8 +515,17 @@ body {
 }
 
 @keyframes wave {
-    0%, 100% { height: 8px; opacity: 0.4; }
-    50% { height: 50px; opacity: 1; }
+
+    0%,
+    100% {
+        height: 8px;
+        opacity: 0.4;
+    }
+
+    50% {
+        height: 50px;
+        opacity: 1;
+    }
 }
 
 .waveform-container.paused .wave-bar {
@@ -579,8 +610,15 @@ body {
 }
 
 @keyframes scaleIn {
-    0% { transform: scale(0); opacity: 0; }
-    100% { transform: scale(1); opacity: 1; }
+    0% {
+        transform: scale(0);
+        opacity: 0;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
 }
 
 .result-icon svg {
@@ -700,5 +738,340 @@ body {
 
     .file-info h3 {
         max-width: 200px;
+    }
+
+    .header-controls {
+        width: 100%;
+        justify-content: flex-start;
+    }
+}
+
+/* ============================================
+   Light Theme (Sky Blue)
+   ============================================ */
+[data-theme="light"] {
+    --bg-primary: #eef4fb;
+    --bg-secondary: #dfe9f5;
+    --bg-card: rgba(255, 255, 255, 0.75);
+    --bg-card-hover: rgba(255, 255, 255, 0.9);
+
+    --text-primary: #1a2332;
+    --text-secondary: #4a5e78;
+    --text-muted: #8898aa;
+
+    --accent-purple: #0ea5e9;
+    --accent-indigo: #0284c7;
+    --accent-pink: #38bdf8;
+    --accent-cyan: #06b6d4;
+    --accent-green: #22c55e;
+    --accent-red: #ef4444;
+
+    --gradient-primary: linear-gradient(135deg, #0ea5e9, #0284c7);
+    --gradient-success: linear-gradient(135deg, #22c55e, #06b6d4);
+    --gradient-danger: linear-gradient(135deg, #ef4444, #f97316);
+
+    --border-subtle: rgba(0, 0, 0, 0.08);
+    --border-accent: rgba(14, 165, 233, 0.3);
+
+    --shadow-glow: 0 0 40px rgba(14, 165, 233, 0.12);
+    --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="light"] .bg-orb {
+    opacity: 0.06;
+}
+
+[data-theme="light"] .input-field {
+    background: rgba(0, 0, 0, 0.03);
+    border-color: rgba(0, 0, 0, 0.1);
+    color: var(--text-primary);
+}
+
+[data-theme="light"] .input-field::placeholder {
+    color: var(--text-muted);
+}
+
+[data-theme="light"] .btn-secondary {
+    background: rgba(0, 0, 0, 0.04);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    color: var(--text-primary);
+}
+
+[data-theme="light"] .btn-secondary:hover {
+    background: rgba(0, 0, 0, 0.07);
+    border-color: var(--border-accent);
+}
+
+[data-theme="light"] .btn-ghost:hover {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="light"] .device-badge {
+    background: rgba(0, 0, 0, 0.04);
+    border-color: rgba(0, 0, 0, 0.08);
+    color: var(--text-secondary);
+}
+
+[data-theme="light"] .format-tag {
+    background: rgba(14, 165, 233, 0.08);
+    color: var(--accent-purple);
+    border-color: rgba(14, 165, 233, 0.2);
+}
+
+[data-theme="light"] .status-message {
+    background: rgba(0, 0, 0, 0.02);
+    border-color: rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="light"] .progress-bar-container {
+    background: rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="light"] .toggle-switch .toggle-slider {
+    background: #c4d1de;
+}
+
+[data-theme="light"] .toggle-switch input:checked+.toggle-slider {
+    background: var(--accent-purple);
+}
+
+/* ============================================
+   Header Controls (Theme + Language)
+   ============================================ */
+.header-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.theme-toggle-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: 1px solid var(--border-subtle);
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.theme-toggle-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--border-accent);
+    transform: rotate(15deg);
+}
+
+[data-theme="light"] .theme-toggle-btn {
+    background: rgba(0, 0, 0, 0.04);
+    border-color: rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="light"] .theme-toggle-btn:hover {
+    background: rgba(0, 0, 0, 0.07);
+}
+
+.lang-select {
+    appearance: none;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border-subtle);
+    border-radius: 20px;
+    padding: 7px 28px 7px 12px;
+    color: var(--text-secondary);
+    font-family: var(--font);
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: var(--transition);
+    outline: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239898b0' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+}
+
+.lang-select:hover {
+    border-color: var(--border-accent);
+}
+
+.lang-select:focus {
+    border-color: var(--accent-purple);
+    box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.1);
+}
+
+.lang-select option {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+[data-theme="light"] .lang-select {
+    background-color: rgba(0, 0, 0, 0.04);
+    border-color: rgba(0, 0, 0, 0.1);
+    color: var(--text-secondary);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%234a5e78' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+}
+
+[data-theme="light"] .lang-select option {
+    background: white;
+    color: var(--text-primary);
+}
+
+/* ============================================
+   FFmpeg Settings Section
+   ============================================ */
+.ffmpeg-section {
+    padding: 20px 24px;
+    margin-bottom: 20px;
+}
+
+.ffmpeg-toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.ffmpeg-toggle-label {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.ffmpeg-manual-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.ffmpeg-status {
+    font-size: 0.78rem;
+    margin-top: 8px;
+    min-height: 20px;
+}
+
+.ffmpeg-status.success {
+    color: var(--accent-green);
+}
+
+.ffmpeg-status.error {
+    color: var(--accent-red);
+}
+
+/* --- Toggle Switch --- */
+.toggle-switch {
+    position: relative;
+    width: 44px;
+    height: 24px;
+    flex-shrink: 0;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 24px;
+    transition: var(--transition);
+}
+
+.toggle-slider::before {
+    content: '';
+    position: absolute;
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background: white;
+    border-radius: 50%;
+    transition: var(--transition);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.toggle-switch input:checked+.toggle-slider {
+    background: var(--gradient-primary);
+}
+
+.toggle-switch input:checked+.toggle-slider::before {
+    transform: translateX(20px);
+}
+
+/* ============================================
+   RTL Support
+   ============================================ */
+[dir="rtl"] {
+    direction: rtl;
+    text-align: right;
+}
+
+[dir="rtl"] .header {
+    flex-direction: row-reverse;
+}
+
+[dir="rtl"] .logo {
+    flex-direction: row-reverse;
+}
+
+[dir="rtl"] .output-input-row,
+[dir="rtl"] .ffmpeg-manual-row {
+    flex-direction: row-reverse;
+}
+
+[dir="rtl"] .section-header-row {
+    flex-direction: row-reverse;
+}
+
+[dir="rtl"] .file-info {
+    flex-direction: row-reverse;
+}
+
+[dir="rtl"] .processing-header {
+    flex-direction: row-reverse;
+}
+
+[dir="rtl"] .device-badge {
+    flex-direction: row-reverse;
+}
+
+[dir="rtl"] .header-controls {
+    flex-direction: row-reverse;
+}
+
+[dir="rtl"] .ffmpeg-toggle-row {
+    flex-direction: row-reverse;
+}
+
+[dir="rtl"] .progress-info {
+    flex-direction: row-reverse;
+}
+
+[dir="rtl"] .lang-select {
+    padding: 7px 12px 7px 28px;
+    background-position: left 10px center;
+}
+
+[dir="rtl"] .toggle-slider::before {
+    left: auto;
+    right: 3px;
+}
+
+[dir="rtl"] .toggle-switch input:checked+.toggle-slider::before {
+    transform: translateX(-20px);
+}
+
+@media (max-width: 600px) {
+    [dir="rtl"] .header {
+        align-items: flex-end;
+    }
+
+    [dir="rtl"] .output-input-row,
+    [dir="rtl"] .ffmpeg-manual-row {
+        flex-direction: column;
     }
 }

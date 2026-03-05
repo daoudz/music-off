@@ -30,11 +30,30 @@ from app.config import (
 # --- Job tracking ---
 jobs: dict = {}
 
+# --- Custom FFmpeg path ---
+_custom_ffmpeg_dir: str | None = None
+
+
+def set_custom_ffmpeg_path(path: str):
+    """Set a custom directory where FFmpeg binaries are located."""
+    global _custom_ffmpeg_dir
+    _custom_ffmpeg_dir = path
+
 
 def get_ffmpeg_path() -> str:
-    """Find FFmpeg in PATH or common locations."""
+    """Find FFmpeg in custom path, PATH, or common locations."""
+    # 1. Check custom path first
+    if _custom_ffmpeg_dir:
+        for name in ("ffmpeg.exe", "ffmpeg"):
+            p = os.path.join(_custom_ffmpeg_dir, name)
+            if os.path.exists(p):
+                return p
+
+    # 2. Auto-detect via PATH
     if shutil.which("ffmpeg"):
         return "ffmpeg"
+
+    # 3. Common locations
     common_paths = [
         r"C:\ffmpeg\bin\ffmpeg.exe",
         r"C:\Program Files\ffmpeg\bin\ffmpeg.exe",

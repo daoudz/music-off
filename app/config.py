@@ -6,8 +6,8 @@ import tempfile
 from pathlib import Path
 
 # --- Limits ---
-MAX_DURATION_SECONDS = 600  # 10 minutes
-MAX_FILE_SIZE_MB = 500  # 500 MB max upload size
+MAX_DURATION_SECONDS = 1800  # 30 minutes
+MAX_FILE_SIZE_MB = 1024  # 1 GB max upload size
 MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024
 
 # --- Supported formats ---

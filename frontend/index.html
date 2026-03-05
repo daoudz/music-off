@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" dir="ltr">
 
 <head>
     <meta charset="UTF-8">
@@ -43,11 +43,17 @@
                     </svg>
                 </div>
                 <div class="logo-text">
-                    <h1>Music-Off</h1>
-                    <span class="tagline">AI-Powered Music Remover</span>
+                    <h1 data-i18n="appTitle">Music-Off</h1>
+                    <span class="tagline" data-i18n="tagline">AI-Powered Music Remover</span>
                 </div>
             </div>
-            <div class="header-info" id="deviceInfo">
+            <div class="header-controls">
+                <select id="langSelect" class="lang-select" title="Language">
+                    <option value="en">🇬🇧 English</option>
+                    <option value="ar">🇸🇦 العربية</option>
+                    <option value="fr">🇫🇷 Français</option>
+                </select>
+                <button id="themeToggleBtn" class="theme-toggle-btn" title="Toggle theme">🌙</button>
                 <div class="device-badge">
                     <span class="device-dot"></span>
                     <span id="deviceText">Checking...</span>
@@ -62,16 +68,47 @@
                 <div class="section-header-row">
                     <div class="section-icon">📂</div>
                     <div>
-                        <h3>Output Directory</h3>
-                        <p class="section-desc">Where your processed files will be saved</p>
+                        <h3 data-i18n="outputTitle">Output Directory</h3>
+                        <p class="section-desc" data-i18n="outputDesc">Where your processed files will be saved</p>
                     </div>
                 </div>
                 <div class="output-input-row">
-                    <input type="text" id="outputDir" placeholder="Enter output directory path..." class="input-field">
-                    <button id="browseOutputBtn" class="btn btn-secondary" title="Browse for folder">📁 Browse</button>
-                    <button id="setOutputBtn" class="btn btn-secondary">Set Path</button>
+                    <input type="text" id="outputDir" data-i18n="outputPlaceholder"
+                        placeholder="Enter output directory path..." class="input-field">
+                    <button id="browseOutputBtn" class="btn btn-secondary" title="Browse for folder"
+                        data-i18n="browseBtn">📁 Browse</button>
+                    <button id="setOutputBtn" class="btn btn-secondary" data-i18n="setPathBtn">Set Path</button>
                 </div>
                 <div id="outputStatus" class="output-status"></div>
+            </section>
+
+            <!-- FFmpeg Settings Section -->
+            <section class="ffmpeg-section glass-card">
+                <div class="section-header-row">
+                    <div class="section-icon">⚙️</div>
+                    <div>
+                        <h3 data-i18n="ffmpegTitle">FFmpeg Settings</h3>
+                        <p class="section-desc" data-i18n="ffmpegDesc">Required for video file processing</p>
+                    </div>
+                </div>
+                <div class="ffmpeg-toggle-row">
+                    <span class="ffmpeg-toggle-label" data-i18n="ffmpegAutoDetect">Auto-detect FFmpeg</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="ffmpegAutoToggle" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                <div id="ffmpegAutoStatus" class="ffmpeg-status"></div>
+                <div id="ffmpegManualSection" class="hidden">
+                    <div class="ffmpeg-manual-row">
+                        <input type="text" id="ffmpegPath" data-i18n="ffmpegManualPlaceholder"
+                            placeholder="Browse to FFmpeg bin folder..." class="input-field">
+                        <button id="browseFfmpegBtn" class="btn btn-secondary" data-i18n="ffmpegBrowseBtn">📁
+                            Browse</button>
+                        <button id="setFfmpegBtn" class="btn btn-secondary" data-i18n="ffmpegSetBtn">Set Path</button>
+                    </div>
+                    <div id="ffmpegManualStatus" class="ffmpeg-status"></div>
+                </div>
             </section>
 
             <!-- Upload Zone -->
@@ -89,8 +126,8 @@
                                 opacity="0.3" />
                         </svg>
                     </div>
-                    <h2>Drop your file here</h2>
-                    <p>or click to browse</p>
+                    <h2 data-i18n="uploadTitle">Drop your file here</h2>
+                    <p data-i18n="uploadSubtitle">or click to browse</p>
                     <div class="upload-formats">
                         <span class="format-tag">MP3</span>
                         <span class="format-tag">WAV</span>
@@ -101,7 +138,7 @@
                         <span class="format-tag">FLAC</span>
                         <span class="format-tag">OGG</span>
                     </div>
-                    <p class="upload-limit">Maximum 10 minutes · Up to 500MB</p>
+                    <p class="upload-limit" data-i18n="uploadLimit">Maximum 30 minutes · Up to 1GB</p>
                     <input type="file" id="fileInput"
                         accept=".mp3,.wav,.flac,.ogg,.aac,.m4a,.wma,.mp4,.mkv,.avi,.mov,.webm,.flv,.wmv" hidden>
                 </div>
@@ -154,13 +191,13 @@
                         </div>
                     </div>
                     <div class="progress-info">
-                        <span id="progressText" class="progress-text">Processing...</span>
+                        <span id="progressText" class="progress-text" data-i18n="processingDefault">Processing...</span>
                         <span id="progressPercent" class="progress-percent">0%</span>
                     </div>
                 </div>
 
                 <!-- Status Message -->
-                <div class="status-message" id="statusMessage">
+                <div class="status-message" id="statusMessage" data-i18n="processingDefault">
                     Preparing to process your file...
                 </div>
             </section>
@@ -181,7 +218,7 @@
                         </defs>
                     </svg>
                 </div>
-                <h2 class="result-title">Music Removed Successfully!</h2>
+                <h2 class="result-title" data-i18n="resultTitle">Music Removed Successfully!</h2>
                 <p class="result-filename" id="resultFilename">output_file.wav</p>
                 <p class="result-path" id="resultPath">Saved to: C:\output\</p>
                 <div class="result-actions">
@@ -190,9 +227,9 @@
                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" />
                         </svg>
-                        Download
+                        <span data-i18n="downloadBtn">Download</span>
                     </button>
-                    <button class="btn btn-secondary" id="newFileBtn">
+                    <button class="btn btn-secondary" id="newFileBtn" data-i18n="newFileBtn">
                         Process Another File
                     </button>
                 </div>
@@ -201,18 +238,19 @@
             <!-- Error Section (hidden by default) -->
             <section class="error-section glass-card hidden" id="errorSection">
                 <div class="error-icon">⚠️</div>
-                <h2 class="error-title">Something went wrong</h2>
+                <h2 class="error-title" data-i18n="errorTitle">Something went wrong</h2>
                 <p class="error-message" id="errorMessage">An error occurred</p>
-                <button class="btn btn-secondary" id="retryBtn">Try Again</button>
+                <button class="btn btn-secondary" id="retryBtn" data-i18n="retryBtn">Try Again</button>
             </section>
         </main>
 
         <!-- Footer -->
         <footer class="footer">
-            <p>Powered by <strong>Demucs AI</strong> by Meta · Built with ❤️</p>
+            <p data-i18n="footerText" data-i18n-html>Powered by <strong>Demucs AI</strong> by Meta · Built with ❤️</p>
         </footer>
     </div>
 
+    <script src="i18n.js"></script>
     <script src="main.js"></script>
 </body>
 

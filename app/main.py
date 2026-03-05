@@ -33,6 +33,9 @@ app.add_middleware(
 # User's selected output directory (persisted in memory)
 user_output_dir: dict = {"path": None}
 
+# Custom FFmpeg path (None = auto-detect)
+custom_ffmpeg_path: dict = {"path": None}
+
 
 @app.post("/api/upload")
 async def upload_file(file: UploadFile = File(...)):
@@ -159,10 +162,75 @@ async def browse_folder():
     return {"path": user_output_dir.get("path"), "selected": False}
 
 
+@app.get("/api/browse-ffmpeg")
+async def browse_ffmpeg():
+    """Open a native folder picker for FFmpeg bin directory."""
+    import asyncio
+
+    def _pick_folder():
+        import tkinter as tk
+        from tkinter import filedialog
+
+        root = tk.Tk()
+        root.withdraw()
+        root.attributes("-topmost", True)
+        folder = filedialog.askdirectory(
+            title="Select FFmpeg bin Folder",
+            initialdir=custom_ffmpeg_path.get("path") or "C:\\",
+        )
+        root.destroy()
+        return folder
+
+    folder = await asyncio.to_thread(_pick_folder)
+
+    if folder:
+        ffmpeg_exe = Path(folder) / "ffmpeg.exe"
+        if not ffmpeg_exe.exists():
+            # Also check without .exe (Linux/Mac)
+            ffmpeg_plain = Path(folder) / "ffmpeg"
+            if not ffmpeg_plain.exists():
+                return {"path": folder, "selected": True, "warning": "ffmpeg not found in this folder"}
+
+        custom_ffmpeg_path["path"] = folder
+        # Update processor's custom path
+        from app.processor import set_custom_ffmpeg_path
+        set_custom_ffmpeg_path(folder)
+        return {"path": folder, "selected": True}
+    return {"path": custom_ffmpeg_path.get("path"), "selected": False}
+
+
+@app.post("/api/set-ffmpeg-path")
+async def set_ffmpeg_path(ffmpeg_path: str = Form(...)):
+    """Set a custom FFmpeg bin directory path."""
+    dir_path = Path(ffmpeg_path)
+    if not dir_path.exists():
+        raise HTTPException(status_code=400, detail=f"Directory does not exist: {ffmpeg_path}")
+    if not dir_path.is_dir():
+        raise HTTPException(status_code=400, detail="Path is not a directory")
+
+    # Check if ffmpeg exists in the directory
+    ffmpeg_exe = dir_path / "ffmpeg.exe"
+    ffmpeg_plain = dir_path / "ffmpeg"
+    if not ffmpeg_exe.exists() and not ffmpeg_plain.exists():
+        raise HTTPException(status_code=400, detail="ffmpeg executable not found in this directory")
+
+    custom_ffmpeg_path["path"] = str(dir_path)
+    from app.processor import set_custom_ffmpeg_path
+    set_custom_ffmpeg_path(str(dir_path))
+
+    return {"message": f"FFmpeg path set to: {ffmpeg_path}", "path": str(dir_path)}
+
+
 @app.get("/api/health")
 async def health():
     """Health check endpoint."""
-    ffmpeg_available = shutil.which("ffmpeg") is not None
+    # Check FFmpeg: custom path first, then auto-detect
+    ffmpeg_available = False
+    if custom_ffmpeg_path.get("path"):
+        ffmpeg_dir = Path(custom_ffmpeg_path["path"])
+        ffmpeg_available = (ffmpeg_dir / "ffmpeg.exe").exists() or (ffmpeg_dir / "ffmpeg").exists()
+    if not ffmpeg_available:
+        ffmpeg_available = shutil.which("ffmpeg") is not None
 
     try:
         import torch
