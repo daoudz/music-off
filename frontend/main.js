@@ -476,7 +476,7 @@ function cleanExpiredEntries() {
 
 function renderSessionHistory() {
     const historySection = document.getElementById('historySection');
-    const historyList = document.getElementById('historyList');
+    const tbody = document.getElementById('historyTableBody');
     const history = getSessionHistory();
 
     if (history.length === 0) {
@@ -485,7 +485,7 @@ function renderSessionHistory() {
     }
 
     historySection.style.display = '';
-    historyList.innerHTML = '';
+    tbody.innerHTML = '';
 
     const now = Date.now();
 
@@ -496,31 +496,21 @@ function renderSessionHistory() {
         const remainMin = Math.ceil(remainMs / 60000);
         const isSoon = remainMin <= 10;
 
-        const item = document.createElement('div');
-        item.className = 'history-item';
-        item.innerHTML = `
-            <div class="history-item-info">
-                <div class="history-item-name" title="${entry.filename}">${entry.filename}</div>
-                <div class="history-item-meta">
-                    <span class="history-item-badge">${t('historyReady')}</span>
-                    <span class="history-item-expiry ${isSoon ? 'expiring-soon' : ''}">
-                        ⏱️ ${remainMin} ${t('historyMinLeft')}
-                    </span>
-                </div>
-            </div>
-            <button class="history-download-btn" title="${t('downloadBtn')}" data-job-id="${entry.jobId}">⬇</button>
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td class="history-cell-name" title="${entry.filename}">${entry.filename}</td>
+            <td class="history-cell-expiry ${isSoon ? 'expiring-soon' : ''}">${remainMin}m</td>
+            <td class="history-cell-action"><button class="history-dl-link" title="${t('downloadBtn')}" data-job-id="${entry.jobId}">⬇</button></td>
         `;
 
-        // Download handler
-        item.querySelector('.history-download-btn').addEventListener('click', () => {
+        row.querySelector('.history-dl-link').addEventListener('click', () => {
             window.open(`${API_BASE}/api/download/${entry.jobId}`, '_blank');
         });
 
-        historyList.appendChild(item);
+        tbody.appendChild(row);
     });
 
-    // If all were expired and filtered out
-    if (historyList.children.length === 0) {
+    if (tbody.children.length === 0) {
         historySection.style.display = 'none';
     }
 }

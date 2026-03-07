@@ -237,9 +237,16 @@
                     <span class="history-chevron" id="historyChevron">▼</span>
                 </div>
                 <div class="history-body hidden" id="historyBody">
-                    <div class="history-list" id="historyList">
-                        <!-- File entries will be injected here by JS -->
-                    </div>
+                    <table class="history-table" id="historyList">
+                        <thead>
+                            <tr>
+                                <th data-i18n="historyColFile">File</th>
+                                <th data-i18n="historyColExpiry">Expires</th>
+                                <th>↓</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyTableBody"></tbody>
+                    </table>
                     <button class="btn btn-ghost history-clear-btn" id="historyClearBtn" data-i18n="historyClear"
                         title="Clear history">🗑️</button>
                 </div>

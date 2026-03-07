@@ -53,6 +53,8 @@ const translations = {
         historyDesc: 'Your processed files from this session',
         historyReady: 'Ready',
         historyMinLeft: 'min left',
+        historyColFile: 'File',
+        historyColExpiry: 'Expires',
         historyClear: '🗑️ Clear All',
 
         // Status messages
@@ -112,6 +114,8 @@ const translations = {
         historyDesc: 'ملفاتك المعالجة في هذه الجلسة',
         historyReady: 'جاهز',
         historyMinLeft: 'دقيقة متبقية',
+        historyColFile: 'الملف',
+        historyColExpiry: 'ينتهي',
         historyClear: '🗑️ مسح الكل',
 
         // Status messages
@@ -171,6 +175,8 @@ const translations = {
         historyDesc: 'Vos fichiers traités de cette session',
         historyReady: 'Prêt',
         historyMinLeft: 'min restantes',
+        historyColFile: 'Fichier',
+        historyColExpiry: 'Expire',
         historyClear: '🗑️ Tout Effacer',
 
         // Status messages

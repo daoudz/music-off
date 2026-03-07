@@ -688,7 +688,7 @@ body {
 /* --- Recent Files / History Section --- */
 .history-section {
     padding: 0;
-    margin-top: 20px;
+    margin-top: 16px;
     overflow: hidden;
 }
 
@@ -696,7 +696,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 16px 24px;
+    padding: 10px 16px;
     cursor: pointer;
     user-select: none;
     transition: var(--transition);
@@ -706,8 +706,20 @@ body {
     background: rgba(255, 255, 255, 0.02);
 }
 
+.history-header .section-icon {
+    font-size: 1rem;
+}
+
+.history-header h3 {
+    font-size: 0.8rem !important;
+}
+
+.history-header .section-desc {
+    font-size: 0.68rem !important;
+}
+
 .history-chevron {
-    font-size: 0.75rem;
+    font-size: 0.65rem;
     color: var(--text-muted);
     transition: transform 0.3s ease;
 }
@@ -717,112 +729,110 @@ body {
 }
 
 .history-body {
-    padding: 0 24px 16px;
+    padding: 0 16px 10px;
 }
 
-.history-list {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+.history-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.72rem;
 }
 
-.history-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 12px 16px;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-sm);
+.history-table thead th {
+    text-align: left;
+    font-size: 0.65rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 4px 8px 6px;
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.history-table thead th:last-child {
+    text-align: center;
+    width: 40px;
+}
+
+.history-table thead th:nth-child(2) {
+    text-align: right;
+    width: 80px;
+}
+
+.history-table tbody tr {
     transition: var(--transition);
-    gap: 12px;
 }
 
-.history-item:hover {
-    background: rgba(255, 255, 255, 0.06);
-    border-color: var(--border-accent);
+.history-table tbody tr:hover {
+    background: rgba(255, 255, 255, 0.03);
 }
 
-.history-item-info {
-    flex: 1;
-    min-width: 0;
+.history-table td {
+    padding: 5px 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+    vertical-align: middle;
 }
 
-.history-item-name {
-    font-size: 0.84rem;
-    font-weight: 500;
+.history-table .history-cell-name {
     color: var(--text-primary);
+    font-weight: 400;
+    max-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    width: 100%;
 }
 
-.history-item-meta {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-top: 3px;
-}
-
-.history-item-expiry {
-    font-size: 0.72rem;
+.history-table .history-cell-expiry {
     color: var(--text-muted);
+    font-size: 0.68rem;
+    text-align: right;
+    white-space: nowrap;
 }
 
-.history-item-expiry.expiring-soon {
+.history-table .history-cell-expiry.expiring-soon {
     color: var(--accent-red);
     font-weight: 600;
 }
 
-.history-item-badge {
-    font-size: 0.65rem;
-    padding: 1px 7px;
-    border-radius: 10px;
-    background: rgba(52, 211, 153, 0.15);
-    color: var(--accent-green);
-    font-weight: 600;
-    letter-spacing: 0.3px;
+.history-table .history-cell-action {
+    text-align: center;
 }
 
-.history-download-btn {
+.history-dl-link {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 34px;
-    height: 34px;
-    border-radius: var(--radius-sm);
+    width: 22px;
+    height: 22px;
+    border-radius: 4px;
     background: var(--gradient-primary);
     color: white;
     border: none;
     cursor: pointer;
     transition: var(--transition);
-    flex-shrink: 0;
-    font-size: 0.9rem;
+    font-size: 0.65rem;
+    text-decoration: none;
+    line-height: 1;
 }
 
-.history-download-btn:hover {
-    transform: scale(1.08);
-    box-shadow: 0 4px 12px rgba(168, 85, 247, 0.3);
+.history-dl-link:hover {
+    transform: scale(1.1);
+    box-shadow: 0 2px 8px rgba(168, 85, 247, 0.3);
 }
 
 .history-clear-btn {
-    margin-top: 10px;
-    font-size: 0.78rem !important;
+    margin-top: 6px;
+    font-size: 0.65rem !important;
     width: 100%;
     color: var(--text-muted) !important;
-    opacity: 0.7;
+    opacity: 0.5;
+    padding: 4px !important;
 }
 
 .history-clear-btn:hover {
     opacity: 1;
     color: var(--accent-red) !important;
-}
-
-.history-empty {
-    text-align: center;
-    padding: 16px;
-    font-size: 0.82rem;
-    color: var(--text-muted);
 }
 
 /* --- Footer --- */
