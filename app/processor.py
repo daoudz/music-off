@@ -512,6 +512,16 @@ async def _run_processing(job_id: str, file_path: str):
         except Exception:
             pass
 
+        # Clean up processing directory immediately (stems, extracted audio, merged audio)
+        # Only the final output file in OUTPUT_DIR needs to be kept for download
+        try:
+            job_proc_dir = PROCESSING_DIR / job_id
+            if job_proc_dir.exists():
+                shutil.rmtree(str(job_proc_dir))
+                print(f"[Cleanup] Freed processing dir: {job_proc_dir}")
+        except Exception as e:
+            print(f"[Cleanup] Warning: could not delete processing dir: {e}")
+
 
 def create_job(filename: str) -> str:
     """Create a new processing job and return its ID."""
