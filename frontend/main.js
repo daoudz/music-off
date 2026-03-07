@@ -241,9 +241,6 @@ function setupEventListeners() {
     });
 
     // Enter key on inputs
-    outputDir.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') setOutputDirectory();
-    });
     ffmpegPath.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') setFfmpegPath();
     });
