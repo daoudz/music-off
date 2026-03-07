@@ -729,11 +729,13 @@ body {
 }
 
 .history-body {
-    padding: 0 16px 10px;
+    padding: 0 16px 12px;
+    overflow: hidden;
 }
 
 .history-table {
     width: 100%;
+    table-layout: fixed;
     border-collapse: collapse;
     font-size: 0.72rem;
 }
@@ -751,12 +753,12 @@ body {
 
 .history-table thead th:last-child {
     text-align: center;
-    width: 40px;
+    width: 36px;
 }
 
 .history-table thead th:nth-child(2) {
     text-align: right;
-    width: 80px;
+    width: 60px;
 }
 
 .history-table tbody tr {
