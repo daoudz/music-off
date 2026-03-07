@@ -63,25 +63,6 @@
 
         <!-- Main Content -->
         <main class="main-content">
-            <!-- Output Directory Section -->
-            <section class="output-section glass-card">
-                <div class="section-header-row">
-                    <div class="section-icon">📂</div>
-                    <div>
-                        <h3 data-i18n="outputTitle">Output Directory</h3>
-                        <p class="section-desc" data-i18n="outputDesc">Where your processed files will be saved</p>
-                    </div>
-                </div>
-                <div class="output-input-row">
-                    <input type="text" id="outputDir" data-i18n="outputPlaceholder"
-                        placeholder="Enter output directory path..." class="input-field">
-                    <button id="browseOutputBtn" class="btn btn-secondary" title="Browse for folder"
-                        data-i18n="browseBtn">📁 Browse</button>
-                    <button id="setOutputBtn" class="btn btn-secondary" data-i18n="setPathBtn">Set Path</button>
-                </div>
-                <div id="outputStatus" class="output-status"></div>
-            </section>
-
             <!-- FFmpeg Settings Section -->
             <section class="ffmpeg-section glass-card">
                 <div class="section-header-row">
@@ -220,7 +201,7 @@
                 </div>
                 <h2 class="result-title" data-i18n="resultTitle">Music Removed Successfully!</h2>
                 <p class="result-filename" id="resultFilename">output_file.wav</p>
-                <p class="result-path" id="resultPath">Saved to: C:\output\</p>
+                <p class="result-path" id="resultPath" data-i18n="downloadExpiry">Download link expires in 1 hour</p>
                 <div class="result-actions">
                     <button class="btn btn-primary" id="downloadBtn">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -241,6 +222,27 @@
                 <h2 class="error-title" data-i18n="errorTitle">Something went wrong</h2>
                 <p class="error-message" id="errorMessage">An error occurred</p>
                 <button class="btn btn-secondary" id="retryBtn" data-i18n="retryBtn">Try Again</button>
+            </section>
+
+            <!-- Recent Files Section (expandable, persisted) -->
+            <section class="history-section glass-card" id="historySection" style="display:none;">
+                <div class="history-header" id="historyToggle">
+                    <div class="section-header-row" style="margin-bottom:0;">
+                        <div class="section-icon">📋</div>
+                        <div>
+                            <h3 data-i18n="historyTitle">Recent Files</h3>
+                            <p class="section-desc" data-i18n="historyDesc">Your processed files from this session</p>
+                        </div>
+                    </div>
+                    <span class="history-chevron" id="historyChevron">▼</span>
+                </div>
+                <div class="history-body hidden" id="historyBody">
+                    <div class="history-list" id="historyList">
+                        <!-- File entries will be injected here by JS -->
+                    </div>
+                    <button class="btn btn-ghost history-clear-btn" id="historyClearBtn" data-i18n="historyClear"
+                        title="Clear history">🗑️</button>
+                </div>
             </section>
         </main>
 

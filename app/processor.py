@@ -351,7 +351,7 @@ def merge_stems(stem_dir: str, output_path: str, stems_to_keep: list) -> bool:
         return False
 
 
-async def process_file(job_id: str, file_path: str, custom_output_dir: Optional[str] = None):
+async def process_file(job_id: str, file_path: str):
     """
     Main processing pipeline. Waits in queue, then processes.
     """
@@ -363,13 +363,13 @@ async def process_file(job_id: str, file_path: str, custom_output_dir: Optional[
     await sem.acquire()
 
     try:
-        await _run_processing(job_id, file_path, custom_output_dir)
+        await _run_processing(job_id, file_path)
     finally:
         sem.release()
         _update_queue_positions()
 
 
-async def _run_processing(job_id: str, file_path: str, custom_output_dir: Optional[str] = None):
+async def _run_processing(job_id: str, file_path: str):
     """
     Actual processing logic, runs after semaphore is acquired.
     """
@@ -442,8 +442,8 @@ async def _run_processing(job_id: str, file_path: str, custom_output_dir: Option
         job["progress"] = 85
         job["message"] = "Creating final output..."
 
-        # Determine output directory
-        out_dir = Path(custom_output_dir) if custom_output_dir else OUTPUT_DIR
+        # Determine output directory (always use server temp dir)
+        out_dir = OUTPUT_DIR
         out_dir.mkdir(parents=True, exist_ok=True)
 
         # Generate output filename

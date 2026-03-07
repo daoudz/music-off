@@ -35,8 +35,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# User's selected output directory (persisted in memory)
-user_output_dir: dict = {"path": None}
+
 
 # Custom FFmpeg path (None = auto-detect)
 custom_ffmpeg_path: dict = {"path": None}
@@ -82,7 +81,7 @@ async def upload_file(file: UploadFile = File(...)):
 
     # Start background processing
     asyncio.create_task(
-        process_file(job_id, str(upload_path), user_output_dir.get("path"))
+        process_file(job_id, str(upload_path))
     )
 
     return {"job_id": job_id, "filename": file.filename, "message": "Processing started"}
@@ -122,56 +121,7 @@ async def download_result(job_id: str):
     )
 
 
-@app.post("/api/set-output-dir")
-async def set_output_dir(directory: str = Form(...)):
-    """Set the output directory for processed files."""
-    dir_path = Path(directory)
-    if not dir_path.exists():
-        try:
-            dir_path.mkdir(parents=True, exist_ok=True)
-        except Exception as e:
-            raise HTTPException(
-                status_code=400, detail=f"Cannot create directory: {str(e)}"
-            )
 
-    if not dir_path.is_dir():
-        raise HTTPException(status_code=400, detail="Path is not a directory")
-
-    user_output_dir["path"] = str(dir_path)
-    return {"message": f"Output directory set to: {directory}", "path": str(dir_path)}
-
-
-@app.get("/api/output-dir")
-async def get_output_dir():
-    """Get the current output directory."""
-    return {"path": user_output_dir.get("path")}
-
-
-@app.get("/api/browse-folder")
-async def browse_folder():
-    """Open a native folder picker dialog and return the selected path."""
-    import asyncio
-
-    def _pick_folder():
-        import tkinter as tk
-        from tkinter import filedialog
-
-        root = tk.Tk()
-        root.withdraw()
-        root.attributes("-topmost", True)
-        folder = filedialog.askdirectory(
-            title="Select Output Folder",
-            initialdir=user_output_dir.get("path") or os.path.expanduser("~"),
-        )
-        root.destroy()
-        return folder
-
-    folder = await asyncio.to_thread(_pick_folder)
-
-    if folder:
-        user_output_dir["path"] = folder
-        return {"path": folder, "selected": True}
-    return {"path": user_output_dir.get("path"), "selected": False}
 
 
 @app.get("/api/browse-ffmpeg")

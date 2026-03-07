@@ -36,11 +36,7 @@ const errorMessage = document.getElementById('errorMessage');
 const retryBtn = document.getElementById('retryBtn');
 const cancelBtn = document.getElementById('cancelBtn');
 
-// Output dir
-const outputDir = document.getElementById('outputDir');
-const setOutputBtn = document.getElementById('setOutputBtn');
-const browseOutputBtn = document.getElementById('browseOutputBtn');
-const outputStatus = document.getElementById('outputStatus');
+
 
 // Theme & Language
 const themeToggleBtn = document.getElementById('themeToggleBtn');
@@ -74,8 +70,8 @@ async function init() {
     loadSavedTheme();
     loadSavedLanguage();
     await checkHealth();
-    await loadOutputDir();
     setupEventListeners();
+    loadSessionHistory();
 }
 
 // ============================
@@ -122,76 +118,7 @@ async function checkHealth() {
     }
 }
 
-// ============================
-// Output Directory
-// ============================
-async function loadOutputDir() {
-    try {
-        const res = await fetch(`${API_BASE}/api/output-dir`);
-        const data = await res.json();
-        if (data.path) {
-            outputDir.value = data.path;
-        }
-    } catch { /* ignore */ }
-}
 
-async function setOutputDirectory() {
-    const dir = outputDir.value.trim();
-    if (!dir) {
-        showOutputStatus(t('enterDirPath'), 'error');
-        return;
-    }
-
-    try {
-        const formData = new FormData();
-        formData.append('directory', dir);
-
-        const res = await fetch(`${API_BASE}/api/set-output-dir`, {
-            method: 'POST',
-            body: formData,
-        });
-
-        const data = await res.json();
-
-        if (res.ok) {
-            showOutputStatus(t('outputSetTo', { path: data.path }), 'success');
-        } else {
-            showOutputStatus(`❌ ${data.detail}`, 'error');
-        }
-    } catch {
-        showOutputStatus(t('connectFail'), 'error');
-    }
-}
-
-async function browseForFolder() {
-    browseOutputBtn.disabled = true;
-    const originalText = browseOutputBtn.textContent;
-    browseOutputBtn.textContent = '⏳';
-
-    try {
-        const res = await fetch(`${API_BASE}/api/browse-folder`);
-        const data = await res.json();
-
-        if (data.selected && data.path) {
-            outputDir.value = data.path;
-            showOutputStatus(t('outputSetTo', { path: data.path }), 'success');
-        }
-    } catch {
-        showOutputStatus(t('pickFolderFail'), 'error');
-    } finally {
-        browseOutputBtn.disabled = false;
-        browseOutputBtn.textContent = originalText;
-    }
-}
-
-function showOutputStatus(msg, type) {
-    outputStatus.textContent = msg;
-    outputStatus.className = `output-status ${type}`;
-    setTimeout(() => {
-        outputStatus.textContent = '';
-        outputStatus.className = 'output-status';
-    }, 5000);
-}
 
 // ============================
 // FFmpeg Settings
@@ -295,9 +222,7 @@ function setupEventListeners() {
         }
     });
 
-    // Output dir buttons
-    setOutputBtn.addEventListener('click', setOutputDirectory);
-    browseOutputBtn.addEventListener('click', browseForFolder);
+
 
     // FFmpeg settings
     ffmpegAutoToggle.addEventListener('change', toggleFfmpegAuto);
@@ -462,10 +387,16 @@ function showSection(section) {
 
 function showResult(job) {
     resultFilename.textContent = job.output_filename || 'processed file';
-    resultPath.textContent = job.output_file
-        ? `Saved to: ${job.output_file}`
-        : 'Available for download';
+    resultPath.textContent = t('downloadExpiry');
     showSection('result');
+
+    // Save to session history
+    saveToSessionHistory({
+        jobId: job.id,
+        filename: job.output_filename || job.filename,
+        completedAt: Date.now(),
+        expiresAt: Date.now() + (60 * 60 * 1000), // 1 hour from now
+    });
 }
 
 function showError(message) {
@@ -493,6 +424,136 @@ function formatFileSize(bytes) {
     if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
     return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
 }
+
+// ============================
+// Session History (persisted)
+// ============================
+const HISTORY_KEY = 'musicoff-history';
+const HISTORY_RETENTION_MS = 60 * 60 * 1000; // 1 hour
+let historyUpdateInterval = null;
+
+function getSessionHistory() {
+    try {
+        return JSON.parse(localStorage.getItem(HISTORY_KEY)) || [];
+    } catch {
+        return [];
+    }
+}
+
+function setSessionHistory(entries) {
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(entries));
+}
+
+function saveToSessionHistory(entry) {
+    const history = getSessionHistory();
+    // Avoid duplicates
+    const exists = history.find(h => h.jobId === entry.jobId);
+    if (!exists) {
+        history.unshift(entry);
+        // Keep max 20 entries
+        if (history.length > 20) history.length = 20;
+        setSessionHistory(history);
+    }
+    renderSessionHistory();
+}
+
+function loadSessionHistory() {
+    cleanExpiredEntries();
+    renderSessionHistory();
+    // Update countdown every 30 seconds
+    if (historyUpdateInterval) clearInterval(historyUpdateInterval);
+    historyUpdateInterval = setInterval(() => {
+        cleanExpiredEntries();
+        renderSessionHistory();
+    }, 30000);
+}
+
+function cleanExpiredEntries() {
+    const history = getSessionHistory();
+    const now = Date.now();
+    const cleaned = history.filter(h => h.expiresAt > now);
+    if (cleaned.length !== history.length) {
+        setSessionHistory(cleaned);
+    }
+}
+
+function renderSessionHistory() {
+    const historySection = document.getElementById('historySection');
+    const historyList = document.getElementById('historyList');
+    const history = getSessionHistory();
+
+    if (history.length === 0) {
+        historySection.style.display = 'none';
+        return;
+    }
+
+    historySection.style.display = '';
+    historyList.innerHTML = '';
+
+    const now = Date.now();
+
+    history.forEach(entry => {
+        const remainMs = entry.expiresAt - now;
+        if (remainMs <= 0) return;
+
+        const remainMin = Math.ceil(remainMs / 60000);
+        const isSoon = remainMin <= 10;
+
+        const item = document.createElement('div');
+        item.className = 'history-item';
+        item.innerHTML = `
+            <div class="history-item-info">
+                <div class="history-item-name" title="${entry.filename}">${entry.filename}</div>
+                <div class="history-item-meta">
+                    <span class="history-item-badge">${t('historyReady')}</span>
+                    <span class="history-item-expiry ${isSoon ? 'expiring-soon' : ''}">
+                        ⏱️ ${remainMin} ${t('historyMinLeft')}
+                    </span>
+                </div>
+            </div>
+            <button class="history-download-btn" title="${t('downloadBtn')}" data-job-id="${entry.jobId}">⬇</button>
+        `;
+
+        // Download handler
+        item.querySelector('.history-download-btn').addEventListener('click', () => {
+            window.open(`${API_BASE}/api/download/${entry.jobId}`, '_blank');
+        });
+
+        historyList.appendChild(item);
+    });
+
+    // If all were expired and filtered out
+    if (historyList.children.length === 0) {
+        historySection.style.display = 'none';
+    }
+}
+
+function toggleHistory() {
+    const body = document.getElementById('historyBody');
+    const chevron = document.getElementById('historyChevron');
+    body.classList.toggle('hidden');
+    chevron.classList.toggle('open');
+    // Save toggle state
+    localStorage.setItem('musicoff-history-open', !body.classList.contains('hidden'));
+}
+
+function clearSessionHistory() {
+    localStorage.removeItem(HISTORY_KEY);
+    renderSessionHistory();
+}
+
+// Setup history event listeners
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('historyToggle').addEventListener('click', toggleHistory);
+    document.getElementById('historyClearBtn').addEventListener('click', clearSessionHistory);
+
+    // Restore toggle state
+    const wasOpen = localStorage.getItem('musicoff-history-open') === 'true';
+    if (wasOpen) {
+        document.getElementById('historyBody').classList.remove('hidden');
+        document.getElementById('historyChevron').classList.add('open');
+    }
+});
 
 // ============================
 // Start

@@ -13,12 +13,7 @@ const translations = {
         themeDark: '🌙',
         themeLight: '☀️',
 
-        // Output section
-        outputTitle: 'Output Directory',
-        outputDesc: 'Where your processed files will be saved',
-        outputPlaceholder: 'Enter output directory path...',
-        browseBtn: '📁 Browse',
-        setPathBtn: 'Set Path',
+
 
         // FFmpeg section
         ffmpegTitle: 'FFmpeg Settings',
@@ -44,6 +39,7 @@ const translations = {
         resultTitle: 'Music Removed Successfully!',
         downloadBtn: 'Download',
         newFileBtn: 'Process Another File',
+        downloadExpiry: '⏱️ Download link expires in 1 hour',
 
         // Error
         errorTitle: 'Something went wrong',
@@ -52,13 +48,17 @@ const translations = {
         // Footer
         footerText: 'Powered by <strong>Demucs AI</strong> by Meta · Built with ❤️',
 
+        // History
+        historyTitle: 'Recent Files',
+        historyDesc: 'Your processed files from this session',
+        historyReady: 'Ready',
+        historyMinLeft: 'min left',
+        historyClear: '🗑️ Clear All',
+
         // Status messages
         unsupportedFormat: 'Unsupported format "{ext}". Supported: {formats}',
         fileTooLarge: 'File is too large. Maximum size is 1GB.',
         uploadFailed: 'Upload failed: {error}. Is the server running?',
-        pickFolderFail: 'Failed to open folder picker',
-        enterDirPath: 'Please enter a directory path',
-        connectFail: 'Failed to connect to server',
         outputSetTo: '✅ Output set to: {path}',
         ffmpegSetTo: '✅ FFmpeg path set to: {path}',
     },
@@ -72,12 +72,7 @@ const translations = {
         themeDark: '🌙',
         themeLight: '☀️',
 
-        // Output section
-        outputTitle: 'مجلد الحفظ',
-        outputDesc: 'أين سيتم حفظ ملفاتك المعالجة',
-        outputPlaceholder: 'أدخل مسار المجلد...',
-        browseBtn: '📁 تصفح',
-        setPathBtn: 'تعيين المسار',
+
 
         // FFmpeg section
         ffmpegTitle: 'إعدادات FFmpeg',
@@ -103,6 +98,7 @@ const translations = {
         resultTitle: 'تمت إزالة الموسيقى بنجاح!',
         downloadBtn: 'تحميل',
         newFileBtn: 'معالجة ملف آخر',
+        downloadExpiry: '⏱️ رابط التحميل ينتهي خلال ساعة',
 
         // Error
         errorTitle: 'حدث خطأ',
@@ -111,13 +107,17 @@ const translations = {
         // Footer
         footerText: 'مدعوم بـ <strong>Demucs AI</strong> من Meta · صُنع بـ ❤️',
 
+        // History
+        historyTitle: 'الملفات الأخيرة',
+        historyDesc: 'ملفاتك المعالجة في هذه الجلسة',
+        historyReady: 'جاهز',
+        historyMinLeft: 'دقيقة متبقية',
+        historyClear: '🗑️ مسح الكل',
+
         // Status messages
         unsupportedFormat: 'صيغة غير مدعومة "{ext}". المدعومة: {formats}',
         fileTooLarge: 'الملف كبير جداً. الحد الأقصى 1 جيجابايت.',
         uploadFailed: 'فشل الرفع: {error}. هل الخادم يعمل؟',
-        pickFolderFail: 'فشل فتح متصفح المجلدات',
-        enterDirPath: 'يرجى إدخال مسار المجلد',
-        connectFail: 'فشل الاتصال بالخادم',
         outputSetTo: '✅ تم تعيين مجلد الحفظ: {path}',
         ffmpegSetTo: '✅ تم تعيين مسار FFmpeg: {path}',
     },
@@ -131,12 +131,7 @@ const translations = {
         themeDark: '🌙',
         themeLight: '☀️',
 
-        // Output section
-        outputTitle: 'Répertoire de sortie',
-        outputDesc: 'Où vos fichiers traités seront sauvegardés',
-        outputPlaceholder: 'Entrez le chemin du répertoire...',
-        browseBtn: '📁 Parcourir',
-        setPathBtn: 'Définir',
+
 
         // FFmpeg section
         ffmpegTitle: 'Paramètres FFmpeg',
@@ -162,6 +157,7 @@ const translations = {
         resultTitle: 'Musique supprimée avec succès !',
         downloadBtn: 'Télécharger',
         newFileBtn: 'Traiter un autre fichier',
+        downloadExpiry: '⏱️ Le lien de téléchargement expire dans 1 heure',
 
         // Error
         errorTitle: 'Une erreur est survenue',
@@ -170,13 +166,17 @@ const translations = {
         // Footer
         footerText: 'Propulsé par <strong>Demucs AI</strong> de Meta · Créé avec ❤️',
 
+        // History
+        historyTitle: 'Fichiers Récents',
+        historyDesc: 'Vos fichiers traités de cette session',
+        historyReady: 'Prêt',
+        historyMinLeft: 'min restantes',
+        historyClear: '🗑️ Tout Effacer',
+
         // Status messages
         unsupportedFormat: 'Format non pris en charge « {ext} ». Formats supportés : {formats}',
         fileTooLarge: 'Le fichier est trop volumineux. Taille maximale : 1 Go.',
         uploadFailed: 'Échec du téléversement : {error}. Le serveur est-il en marche ?',
-        pickFolderFail: 'Impossible d\'ouvrir le sélecteur de dossier',
-        enterDirPath: 'Veuillez entrer un chemin de répertoire',
-        connectFail: 'Échec de connexion au serveur',
         outputSetTo: '✅ Sortie définie sur : {path}',
         ffmpegSetTo: '✅ Chemin FFmpeg défini sur : {path}',
     },
