@@ -65,8 +65,10 @@ def main():
 
     from app.config import HOST, PORT
 
-    url = f"http://{HOST}:{PORT}"
-    print(f"[>>] Starting server at {url}")
+    # Use 127.0.0.1 for browser URL even when binding to 0.0.0.0
+    browse_host = "127.0.0.1" if HOST == "0.0.0.0" else HOST
+    url = f"http://{browse_host}:{PORT}"
+    print(f"[>>] Starting server at {url} (listening on {HOST})")
     print(f"     Press Ctrl+C to stop")
     print()
 

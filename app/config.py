@@ -36,7 +36,7 @@ STEMS_TO_KEEP = ["vocals"]
 STEMS_TO_DISCARD = ["drums", "bass", "other"]
 
 # --- Server ---
-HOST = "127.0.0.1"
+HOST = "0.0.0.0"  # Listen on all interfaces (LAN accessible)
 PORT = 8765
 
 # --- Job Queue ---
