@@ -264,7 +264,11 @@ function escapeHtml(str) {
 // --- Polling ---
 async function fetchMetrics() {
     try {
-        const res = await fetch(`${API}/api/metrics`);
+        const res = await fetch(`${API}/api/metrics`, { credentials: 'same-origin' });
+        if (res.status === 401 || res.status === 429) {
+            window.location.reload();
+            return;
+        }
         const data = await res.json();
 
         updateKPIs(data);

@@ -8,3 +8,11 @@ dist/
 build/
 node_modules/
 frontend/dist/
+
+# Deployment scripts
+deploy_sys.py
+deploy_files.py
+deploy_config.py
+fix_ffmpeg.py
+update_domain.py
+sync_hot_reload.py

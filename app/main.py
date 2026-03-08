@@ -8,9 +8,9 @@ import shutil
 import time
 from pathlib import Path
 
-from fastapi import FastAPI, File, Form, HTTPException, UploadFile
+from fastapi import FastAPI, File, Form, HTTPException, UploadFile, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
 from app.config import (
@@ -34,6 +34,30 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+# --- Dashboard Auth ---
+DASH_PASSWORD = "@12345678"
+AUTH_STATE = {}  # ip: {"attempts": int, "blocked_until": float}
+
+def _check_ip_blocked(client_ip: str) -> bool:
+    state = AUTH_STATE.get(client_ip)
+    if not state: return False
+    return time.time() < state["blocked_until"]
+
+def _record_failed_attempt(client_ip: str):
+    now = time.time()
+    state = AUTH_STATE.get(client_ip, {"attempts": 0, "blocked_until": 0})
+    if now >= state["blocked_until"]:
+        state["attempts"] += 1
+        if state["attempts"] >= 3:
+            state["blocked_until"] = now + 60  # Block for 1 min
+            state["attempts"] = 0
+    AUTH_STATE[client_ip] = state
+
+def _reset_attempts(client_ip: str):
+    if client_ip in AUTH_STATE:
+        AUTH_STATE[client_ip] = {"attempts": 0, "blocked_until": 0}
 
 
 
@@ -274,8 +298,16 @@ async def startup_event():
 
 
 @app.get("/api/metrics")
-async def get_metrics():
+async def get_metrics(request: Request):
     """Full metrics endpoint for the admin dashboard."""
+    client_ip = request.client.host
+    if _check_ip_blocked(client_ip):
+        raise HTTPException(status_code=429, detail="Blocked due to too many failed attempts")
+        
+    auth_cookie = request.cookies.get("dash_auth")
+    if auth_cookie != DASH_PASSWORD:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+
     import psutil
 
     now = time.time()
@@ -352,12 +384,90 @@ async def get_metrics():
 
 
 @app.get("/dashboard", response_class=HTMLResponse)
-async def dashboard_page():
+async def dashboard_page(request: Request):
     """Serve the admin dashboard page."""
+    client_ip = request.client.host
+    if _check_ip_blocked(client_ip):
+        return HTMLResponse("<h1>Too many failed attempts. Try again in 1 minute.</h1>", status_code=429)
+        
+    auth_cookie = request.cookies.get("dash_auth")
+    if auth_cookie != DASH_PASSWORD:
+        login_html = """
+        <!DOCTYPE html>
+        <html><head><title>Dashboard Login</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+            body { background: #0a0a0f; color: white; font-family: 'Inter', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+            form { background: rgba(18, 18, 30, 0.65); padding: 40px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.06); text-align: center; width: 100%; max-width: 400px; box-sizing: border-box; }
+            h2 { margin-top: 0; }
+            input[type=password] { padding: 12px; border-radius: 8px; border: 1px solid #333; background: #1a1a24; color: white; width: 100%; box-sizing: border-box; margin-bottom: 20px; outline: none; transition: 0.3s; }
+            input[type=password]:focus { border-color: #a855f7; }
+            button { background: linear-gradient(135deg, #a855f7, #6366f1); color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; width: 100%; font-weight: bold; transition: 0.3s; }
+            button:hover { opacity: 0.9; transform: translateY(-1px); }
+        </style>
+        </head><body>
+        <form method="POST" action="/dashboard/login">
+            <h2>Dashboard Access</h2>
+            <p style="color:#9898b0; font-size: 0.9em; margin-bottom: 24px;">Please enter the password to view metrics.</p>
+            <input type="password" name="password" placeholder="Password" required autofocus>
+            <button type="submit">Unlock Dashboard</button>
+        </form>
+        </body></html>
+        """
+        return HTMLResponse(content=login_html)
+
     dashboard_path = Path(__file__).parent.parent / "frontend" / "dashboard.html"
     if dashboard_path.exists():
         return HTMLResponse(content=dashboard_path.read_text(encoding="utf-8"))
     return HTMLResponse(content="<h1>Dashboard not found</h1>", status_code=404)
+
+
+@app.post("/dashboard/login")
+async def dashboard_login(request: Request, password: str = Form(...)):
+    client_ip = request.client.host
+    if _check_ip_blocked(client_ip):
+        return HTMLResponse("<h1>Too many failed attempts. Try again in 1 minute.</h1>", status_code=429)
+        
+    if password == DASH_PASSWORD:
+        _reset_attempts(client_ip)
+        response = RedirectResponse(url="/dashboard", status_code=303)
+        response.set_cookie(key="dash_auth", value=password, max_age=86400 * 30, httponly=True)
+        return response
+        
+    _record_failed_attempt(client_ip)
+    
+    state = AUTH_STATE.get(client_ip, {})
+    attempts = state.get("attempts", 0)
+    msg = "Invalid password."
+    if attempts > 0:
+        msg += f" ({3 - attempts} attempts remaining)"
+        
+    if _check_ip_blocked(client_ip):
+        msg = "Too many failed attempts. Blocked for 1 minute."
+        
+    error_html = f"""
+        <!DOCTYPE html>
+        <html><head><title>Dashboard Login</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+            body {{ background: #0a0a0f; color: white; font-family: 'Inter', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }}
+            form {{ background: rgba(18, 18, 30, 0.65); padding: 40px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.06); text-align: center; width: 100%; max-width: 400px; box-sizing: border-box; }}
+            h2 {{ margin-top: 0; }}
+            input[type=password] {{ padding: 12px; border-radius: 8px; border: 1px solid #f43f5e; background: #1a1a24; color: white; width: 100%; box-sizing: border-box; margin-bottom: 20px; outline: none; }}
+            button {{ background: linear-gradient(135deg, #a855f7, #6366f1); color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; width: 100%; font-weight: bold; transition: 0.3s; }}
+            button:hover {{ opacity: 0.9; transform: translateY(-1px); }}
+            .error {{ color: #f43f5e; margin-bottom: 15px; font-size: 0.9em; background: rgba(244, 63, 94, 0.1); padding: 10px; border-radius: 6px; border: 1px solid rgba(244, 63, 94, 0.2); }}
+        </style>
+        </head><body>
+        <form method="POST" action="/dashboard/login">
+            <h2>Dashboard Access</h2>
+            <div class="error">{msg}</div>
+            <input type="password" name="password" placeholder="Password" required autofocus>
+            <button type="submit">Unlock Dashboard</button>
+        </form>
+        </body></html>
+    """
+    return HTMLResponse(content=error_html)
 
 
 # Serve frontend static files
